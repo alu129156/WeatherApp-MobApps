@@ -1,12 +1,15 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    kotlin("plugin.serialization") version "1.5.21"
 }
 
 android {
     namespace = "com.example.weatherapp_juanarizaonecha"
     compileSdk = 34
-
+    viewBinding {
+        enable = true
+    }
     defaultConfig {
         applicationId = "com.example.weatherapp_juanarizaonecha"
         minSdk = 24
@@ -36,7 +39,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -45,4 +47,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.kotlinx.serialization.json)
 }

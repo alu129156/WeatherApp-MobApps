@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">WeatherApp-JuanArizaOnecha</string>
+    <string name="loading">Loading...</string>
+    <string name="charginglogoimage">chargingLogoImage</string>
+    <string name="loadingimage">loadingImage</string>
+    <string name="imagegearlu">imageGearLU</string>
+    <string name="iamgegearru">iamgegearru</string>
+    <string name="imagegearld">imagegearld</string>
+    <string name="imagegearrd">imagegearrd</string>
 </resources>
