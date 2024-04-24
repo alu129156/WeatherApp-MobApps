@@ -51,23 +51,32 @@ class SplashScreenActivity : AppCompatActivity() {
 
 }
 
-class DataExtraction(activity: SplashScreenActivity) : AsyncTask<Unit, Unit, String>() {
+class DataExtraction(activity: SplashScreenActivity) : AsyncTask<Unit, Unit, Map<String,String>>() {
+    // I use HashMap to ensure that pairs city->apiResponse is well ordered
+
     private val activityReference = WeakReference(activity)
     @Deprecated("Deprecated in Java")
-    override fun doInBackground(vararg params: Unit?): String {
-        return fetchDataFromApi()
+    override fun doInBackground(vararg params: Unit?): Map<String,String> {
+        val results = mutableMapOf<String,String>();
+        WeatherDataSingleton.cities.keys.map{ city ->
+            results[city] = fetchDataFromApi(city)
+            persistDataInFile(city,results[city]!!)
+        }
+        return results
     }
 
-    @Deprecated("Deprecated in Java", ReplaceWith("Singleton.instance.data = result"))
-    override fun onPostExecute(result: String) {
-        processData(result)
-        //print(WeatherDataSingleton.temperaturesHOUR)
+    @Deprecated("Deprecated in Java")
+    override fun onPostExecute(results: Map<String,String>) {
+        results.keys.map{ city ->
+            WeatherDataSingleton.fillDataWeather(city,results[city]!!) //Process data
+        }
         activityReference.get()?.navigateToMainScreen()
     }
 
-    private fun fetchDataFromApi(): String {
+    private fun fetchDataFromApi(city: String): String {
         var result = ""
-        val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/41.65606,-0.87734?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
+        val countryISO = WeatherDataSingleton.cities[city]!!
+        val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city},${countryISO}?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
         val urlConnection = url.openConnection() as HttpURLConnection
         try {
             val inSt = BufferedInputStream(urlConnection.inputStream)
@@ -88,17 +97,33 @@ class DataExtraction(activity: SplashScreenActivity) : AsyncTask<Unit, Unit, Str
         return total.toString()
     }
 
-
-    private fun processData(jsonData: String) {
-        WeatherDataSingleton.fillDataWeather(jsonData)
+    private fun persistDataInFile(city: String, data: String) {
+        //FALTA IMPLEMENTAR
+        val file = "${city}.txt"
     }
 }
 
-//PRUEBAS
 /*
-private fun fetchDataFromApi(): String {
+fun main(){
+    val results = mutableMapOf<String,String>();
+    WeatherDataSingleton.citiesCoordinates.keys.map{ city ->
+        print(city+"\n")
+        results.put(city,fetchDataFromApi(city))
+    }
+    results.keys.map{ city ->
+        WeatherDataSingleton.fillDataWeather(city,results[city]!!) //Process data
+    }
+    print(WeatherDataSingleton.temperaturesDAYS["Moscow"])
+    print("\n")
+    print(WeatherDataSingleton.precipprobsDAYS["Beijing"])
+    print("\n")
+    print(WeatherDataSingleton.descriptionsDAYS["Zaragoza"])
+}
+
+private fun fetchDataFromApi(city: String): String {
     var result = ""
-    val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/41.65606,-0.87734?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
+    val coordinates = WeatherDataSingleton.citiesCoordinates[city]!!
+    val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${coordinates[0]},${coordinates[1]}?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
     val urlConnection = url.openConnection() as HttpURLConnection
     try {
         val inSt = BufferedInputStream(urlConnection.inputStream)
@@ -117,18 +142,5 @@ private fun readStream(inputStream : InputStream) : String {
         total.append(line).append('\n')
     }
     return total.toString()
-}
-
-private fun processWeatherData(jsonData: String) {
-    WeatherDataSingleton.fillData(jsonData)
-}
-
-fun main(){
-    processWeatherData(fetchDataFromApi())
-    print(WeatherDataSingleton.descriptions.get(0).get(0))
-    print('\n')
-    print(WeatherDataSingleton.temperaturesHOUR.get(0))
-    //print('\n')
-    //print(WeatherDataSingleton.hourlyForecasts)
 }
 */

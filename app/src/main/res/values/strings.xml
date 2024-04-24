@@ -7,4 +7,14 @@
     <string name="iamgegearru">iamgegearru</string>
     <string name="imagegearld">imagegearld</string>
     <string name="imagegearrd">imagegearrd</string>
+    <string name="clouds">clouds</string>
+    <string name="gps_location">GPS LOCATION</string>
+    <string name="now_in">Now In</string>
+    <string name="moon">moon</string>
+    <string name="day">DAY</string>
+    <string name="temp">TEMP</string>
+    <string name="max">MAX</string>
+    <string name="min">MIN</string>
+    <string name="favourite_cities">Favourite Cities</string>
+    <string name="list_of_cities">List of Cities</string>
 </resources>
