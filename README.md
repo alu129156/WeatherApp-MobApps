@@ -1,5 +1,5 @@
 # 🌧 Weather Aplication
-**_This is an individual project for the subject "Mobile Applications". This code has been developed by Juan Ariza Onecha (alu129156)._**
+**_This is an individual project for the subject "Mobile Applications". This code has been developed by Juan Ariza Onecha (alu129156,Chorizoiberico17)._**
 
 For this assignment, you need to create a complete APP including several task explored during the course. The basic structure of the app could follow this diagram.
 
