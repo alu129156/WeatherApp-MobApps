@@ -1,0 +1,61 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3F78B5"
+    android:orientation="vertical"
+    tools:ignore="VisualLintTextFieldSize,VisualLintBounds">
+
+    <SearchView
+        android:id="@+id/swCitiesList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#96FDF1"
+        android:iconifiedByDefault="false"
+        android:queryHint="Cities">
+    </SearchView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/button_border">
+        <Button
+            android:id="@+id/btnFiltCoord"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/coordinates_cl"
+            android:textColor="#000000"
+            tools:ignore="VisualLintButtonSize,TextContrastCheck"
+            tools:text="Coordinates" />
+
+        <Button
+            android:id="@+id/btnFiltTemp"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/temperature_cl"
+            android:textColor="#000000"
+            tools:ignore="TextContrastCheck,VisualLintButtonSize" />
+
+        <Button
+            android:id="@+id/btnFiltWindSp"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/wind_speed_cl"
+            android:textColor="#000000"
+            tools:ignore="VisualLintButtonSize" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lwCitiesList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

@@ -12,11 +12,13 @@ class MainScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(view.root)
-        UsersSingleton.fillCities() //Load the 10 cities with all the data stored
-        val cityDefault = "Zaragoza"
+
+        val cityDefault = findCityDefault()
         loadAnimations()
-        setGpsLocation(cityDefault)
-        setWeatherData(cityDefault)
+        if (cityDefault != null) {
+            setGpsLocation(cityDefault)
+            setWeatherData(cityDefault)
+        }
 
         view.btnCitiesList.setOnClickListener{
             startActivity(Intent(this,CitiesListActivity::class.java))
@@ -27,15 +29,24 @@ class MainScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun setGpsLocation(city: String) {
-        val gpsLocation = WeatherDataSingleton.resolvedAddress[city] + "\n( " +
-                WeatherDataSingleton.latitude[city].toString() + "," +
-                WeatherDataSingleton.longitude[city].toString() + ")"
+    private fun findCityDefault(): City? {
+        DataUtils.cities.forEach { city ->
+            if(city.isCity(WeatherCities.Zaragoza.name)){
+                return city;
+            }
+        }
+        return null;
+    }
+
+    private fun setGpsLocation(city: City) {
+        val gpsLocation = city.resolvedAdress + "\n( " +
+                city.latitude.toString() + "," +
+                city.longitude.toString() + ")"
         view.twGpsLocation.text = gpsLocation
     }
 
-    private fun setWeatherData(city: String) {
-        view.twDescription.text = WeatherDataSingleton.descriptions[city]
+    private fun setWeatherData(city: City) {
+        view.twDescription.text = city.description
 
         val dateViews = listOf(view.tw00, view.tw10, view.tw20, view.tw30, view.tw40)
         val tempViews = listOf(view.tw01, view.tw11, view.tw21, view.tw31, view.tw41)
@@ -44,10 +55,10 @@ class MainScreenActivity : AppCompatActivity() {
 
         val numDays = dateViews.size
         for (i in 0 until  numDays) {
-            dateViews[i].text = WeatherDataSingleton.dateTimesDAYS[city]?.get(i)
-            tempViews[i].text = WeatherDataSingleton.temperaturesDAYS[city]?.get(i).toString()
-            tempMaxViews[i].text = WeatherDataSingleton.tempMaxDAYS[city]?.get(i).toString()
-            tempMinViews[i].text = WeatherDataSingleton.tempMinDAYS[city]?.get(i).toString()
+            dateViews[i].text = city.forecasts[i].getDayAndMonth()
+            tempViews[i].text = city.forecasts[i].temperature.getDegrees()
+            tempMaxViews[i].text = city.forecasts[i].temperatureMax.getDegrees()
+            tempMinViews[i].text = city.forecasts[i].temperatureMin.getDegrees()
         }
     }
 

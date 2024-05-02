@@ -1,43 +1,53 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.weatherapp_juanarizaonecha
-
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp_juanarizaonecha.databinding.ActivitySplashScreenBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
-import java.net.URL
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
     private val view by lazy { ActivitySplashScreenBinding.inflate(layoutInflater) }
+    private val fileName = "cties.txt"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(view.root)
         startRotatingImageLogo()
-        loadData()
-    }
+        val scope = CoroutineScope(Dispatchers.IO) //IO operations
+        val jobs = mutableListOf<Job>()
 
-    private fun loadData() {
-        val data = DataExtraction(this)
-        data.execute()
-    }
+        DataUtils.citiesRequest.forEach { cityReq ->
+            val job = scope.launch {
+                val apiData = fetchDataFromApi(cityReq)
+                DataUtils.fillData(cityReq, apiData)
+            }
+            jobs.add(job)
+        }
 
-
-    public fun navigateToMainScreen() {
-        val intent = Intent(this, MainScreenActivity::class.java)
-        startActivity(intent)
-        finish() // Activity out of the stack
+        // Mueve la lógica de espera a una corrutina en IO
+        scope.launch {
+            jobs.joinAll()
+            withContext(Dispatchers.Main) {
+                DataUtils.setCitiesIntoList()
+                navigateToMainActivity()
+            }
+        }
     }
 
     private fun startRotatingImageLogo() {
@@ -49,34 +59,9 @@ class SplashScreenActivity : AppCompatActivity() {
         view.imGearRD.startAnimation(rotateAnimation)
     }
 
-}
-
-class DataExtraction(activity: SplashScreenActivity) : AsyncTask<Unit, Unit, Map<String,String>>() {
-    // I use HashMap to ensure that pairs city->apiResponse is well ordered
-
-    private val activityReference = WeakReference(activity)
-    @Deprecated("Deprecated in Java")
-    override fun doInBackground(vararg params: Unit?): Map<String,String> {
-        val results = mutableMapOf<String,String>();
-        WeatherDataSingleton.cities.keys.map{ city ->
-            results[city] = fetchDataFromApi(city)
-            persistDataInFile(city,results[city]!!)
-        }
-        return results
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onPostExecute(results: Map<String,String>) {
-        results.keys.map{ city ->
-            WeatherDataSingleton.fillDataWeather(city,results[city]!!) //Process data
-        }
-        activityReference.get()?.navigateToMainScreen()
-    }
-
-    private fun fetchDataFromApi(city: String): String {
+    private fun fetchDataFromApi(cityRequest: CityRequest): String {
         var result = ""
-        val countryISO = WeatherDataSingleton.cities[city]!!
-        val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city},${countryISO}?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
+        val url = cityRequest.getUrl()
         val urlConnection = url.openConnection() as HttpURLConnection
         try {
             val inSt = BufferedInputStream(urlConnection.inputStream)
@@ -97,50 +82,17 @@ class DataExtraction(activity: SplashScreenActivity) : AsyncTask<Unit, Unit, Map
         return total.toString()
     }
 
-    private fun persistDataInFile(city: String, data: String) {
-        //FALTA IMPLEMENTAR
-        val file = "${city}.txt"
+    private fun navigateToMainActivity() {
+        val intent = Intent(this@SplashScreenActivity,MainScreenActivity::class.java)
+        startActivity(intent)
+        finish() //Out of the Stack
     }
-}
 
-/*
-fun main(){
-    val results = mutableMapOf<String,String>();
-    WeatherDataSingleton.citiesCoordinates.keys.map{ city ->
-        print(city+"\n")
-        results.put(city,fetchDataFromApi(city))
+    private fun writeFile(text: String) {
+        var fos : FileOutputStream? = null
+        fos = openFileOutput(fileName, MODE_PRIVATE)
+        fos.write(text.toByteArray())
+        fos?.close()
+        Log.d("TAG1", "File save in $filesDir/$fileName")
     }
-    results.keys.map{ city ->
-        WeatherDataSingleton.fillDataWeather(city,results[city]!!) //Process data
-    }
-    print(WeatherDataSingleton.temperaturesDAYS["Moscow"])
-    print("\n")
-    print(WeatherDataSingleton.precipprobsDAYS["Beijing"])
-    print("\n")
-    print(WeatherDataSingleton.descriptionsDAYS["Zaragoza"])
 }
-
-private fun fetchDataFromApi(city: String): String {
-    var result = ""
-    val coordinates = WeatherDataSingleton.citiesCoordinates[city]!!
-    val url = URL("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${coordinates[0]},${coordinates[1]}?key=X4L4EFE3SE4UUWFRSNTVRHWWB")
-    val urlConnection = url.openConnection() as HttpURLConnection
-    try {
-        val inSt = BufferedInputStream(urlConnection.inputStream)
-        result = readStream(inSt)
-    } finally {
-        urlConnection.disconnect()
-    }
-    return result
-}
-
-private fun readStream(inputStream : InputStream) : String {
-    val br = BufferedReader(InputStreamReader(inputStream))
-    val total = StringBuilder()
-    while (true) {
-        val line = br.readLine() ?: break
-        total.append(line).append('\n')
-    }
-    return total.toString()
-}
-*/

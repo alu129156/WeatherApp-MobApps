@@ -15,10 +15,13 @@
         android:theme="@style/Theme.WeatherAppJuanArizaOnecha"
         tools:targetApi="31">
         <activity
-            android:name=".CitiesListActivity"
+            android:name=".SearchFilterBaseActivity"
             android:exported="false" />
         <activity
-            android:name=".CitiesList"
+            android:name=".CityDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CitiesListActivity"
             android:exported="false" />
         <activity
             android:name=".FavouriteCitiesActivity"

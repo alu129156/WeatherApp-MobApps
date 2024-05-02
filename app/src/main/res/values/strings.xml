@@ -17,4 +17,13 @@
     <string name="min">MIN</string>
     <string name="favourite_cities">Favourite Cities</string>
     <string name="list_of_cities">List of Cities</string>
+    <string name="temperature" />
+    <string name="coordinates_cl">Coordinates</string>
+    <string name="wind_speed_cl">Wind Speed</string>
+    <string name="temperature_cl">Temperature</string>
+    <string name="add_city">Add City</string>
+    <string name="remove_city">Remove City</string>
+    <string name="back">Back</string>
+    <string name="remove">Remove</string>
+    <string name="add">Add</string>
 </resources>
