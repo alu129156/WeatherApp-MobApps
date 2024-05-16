@@ -44,7 +44,7 @@ class SearchFilterController(private val list: List<City>) {
             val param = when (paramFilter) {
                 Filters.WIND_SPEED -> city.forecasts[0].windSpeed.toString() + "km/h"
                 Filters.TEMPERATURE -> city.forecasts[0].temperature.getDegrees()
-                else -> "(${String.format("%.2f",city.latitude)},${String.format("%.2f",city.longitude)})"
+                else -> "(${String.format("%.1f",city.latitude)},${String.format("%.1f",city.longitude)})"
             }
             result.add(changeStringToColour(city,param,index))
             index += 1
