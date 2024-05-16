@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25">
+
+        <ImageView
+            android:id="@+id/imNoReport"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            app:srcCompat="@mipmap/no_reported"
+            android:contentDescription="@string/no_report" />
+
+        <ImageView
+            android:id="@+id/imSavedReport"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:contentDescription="@string/db_image"
+            app:srcCompat="@mipmap/saved_report"
+            tools:ignore="ImageContrastCheck" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/twCity"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="@string/city_name"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/twDateItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF" />
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/btnFav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:layout_gravity="right"
+            tools:ignore="RtlHardcoded,SpeakableTextPresentCheck,VisualLintButtonSize" />
+
+
+        <TextView
+            android:id="@+id/tvHeart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="New TextView"
+            android:visibility="gone"
+            tools:ignore="RtlHardcoded" />
+    </FrameLayout>
+</LinearLayout>
+

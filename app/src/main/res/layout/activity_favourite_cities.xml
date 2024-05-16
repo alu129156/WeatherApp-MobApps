@@ -9,5 +9,6 @@
     <include
         layout="@layout/activity_search_filter_base"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="644dp" />
+
 </LinearLayout>

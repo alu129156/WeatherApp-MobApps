@@ -1,12 +1,25 @@
 package com.example.weatherapp_juanarizaonecha
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.example.weatherapp_juanarizaonecha.dao.SQLiteCityDao
 import com.example.weatherapp_juanarizaonecha.databinding.ActivitySplashScreenBinding
+import com.example.weatherapp_juanarizaonecha.sharedpreferences.CrudAPI
+import com.example.weatherapp_juanarizaonecha.sharedpreferences.SHARED_PREFERENCES_NAME
+import com.example.weatherapp_juanarizaonecha.sharedpreferences.SharedPreferencesRepository
+import com.example.weatherapp_juanarizaonecha.utils.CityRequest
+import com.example.weatherapp_juanarizaonecha.utils.DataUtils
+import com.example.weatherapp_juanarizaonecha.utils.HistoricUtils
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,8 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedReader
-import java.io.DataOutputStream
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -24,31 +35,62 @@ import java.net.HttpURLConnection
 @SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
     private val view by lazy { ActivitySplashScreenBinding.inflate(layoutInflater) }
-    private val fileName = "cties.txt"
+    private lateinit var flpc: FusedLocationProviderClient
+    private val repository: CrudAPI by lazy {
+        SharedPreferencesRepository(
+            application.getSharedPreferences(
+                SHARED_PREFERENCES_NAME,
+                MODE_PRIVATE
+            )
+        )
+    }
+    private val dao : SQLiteCityDao by lazy { init() }
+    private fun init() : SQLiteCityDao {
+        val dao = SQLiteCityDao()
+        dao.setContext(this)
+        return dao
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(view.root)
+        flpc = LocationServices.getFusedLocationProviderClient(this)
         startRotatingImageLogo()
-        val scope = CoroutineScope(Dispatchers.IO) //IO operations
+
+        val scope = CoroutineScope(Dispatchers.IO)
         val jobs = mutableListOf<Job>()
 
-        DataUtils.citiesRequest.forEach { cityReq ->
-            val job = scope.launch {
-                val apiData = fetchDataFromApi(cityReq)
-                DataUtils.fillData(cityReq, apiData)
-            }
-            jobs.add(job)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) { //REQUEST LOCATION PERMISIONS
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
         }
 
-        // Mueve la lógica de espera a una corrutina en IO
-        scope.launch {
-            jobs.joinAll()
-            withContext(Dispatchers.Main) {
-                DataUtils.setCitiesIntoList()
-                navigateToMainActivity()
+        flpc.lastLocation.addOnSuccessListener { location->
+            DataUtils.latitude = location.latitude
+            DataUtils.longitude = location.longitude
+
+            DataUtils.citiesRequest.forEach { cityReq ->
+                val job = scope.launch {
+                    val apiData = fetchDataFromApi(cityReq)
+                    DataUtils.fillData(cityReq, apiData)
+                }
+                jobs.add(job)
+            }
+
+            scope.launch {
+                jobs.joinAll()
+                withContext(Dispatchers.Main) {
+                    DataUtils.setCitiesIntoList()
+                    DataUtils.setFavCities(repository)
+                    loadAllReports()
+                    navigateToMainActivity(this@SplashScreenActivity)
+                }
             }
         }
+
     }
+
 
     private fun startRotatingImageLogo() {
         val rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate_animation)
@@ -82,17 +124,24 @@ class SplashScreenActivity : AppCompatActivity() {
         return total.toString()
     }
 
-    private fun navigateToMainActivity() {
-        val intent = Intent(this@SplashScreenActivity,MainScreenActivity::class.java)
-        startActivity(intent)
-        finish() //Out of the Stack
+
+    private fun loadAllReports() {
+        DataUtils.user.cities.forEach { city ->
+            val histories = dao.findReportsByCity(city.name)
+            //HistoricUtils.setAllCities(histories)
+            if(histories.isNotEmpty()){
+                city.reported = true
+                city.dateTimeLastReport = histories[histories.size -1].dateTime //Last report time
+            } else {
+                city.reported = false
+            }
+        }
+        HistoricUtils.setAllCities(dao.findAll())
     }
 
-    private fun writeFile(text: String) {
-        var fos : FileOutputStream? = null
-        fos = openFileOutput(fileName, MODE_PRIVATE)
-        fos.write(text.toByteArray())
-        fos?.close()
-        Log.d("TAG1", "File save in $filesDir/$fileName")
+    private fun navigateToMainActivity(context: Context) {
+        val intent = Intent(context,MainScreenActivity::class.java)
+        startActivity(intent)
+        finish() //Out of the Stack
     }
 }

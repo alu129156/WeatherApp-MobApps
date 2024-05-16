@@ -26,4 +26,15 @@
     <string name="back">Back</string>
     <string name="remove">Remove</string>
     <string name="add">Add</string>
+    <string name="precip">PRECIP</string>
+    <string name="wind">WIND</string>
+    <string name="favourite">Favourite</string>
+    <string name="save">Save</string>
+    <string name="historical_data">Historical Data</string>
+    <string name="city_name">City Name</string>
+    <string name="rainy_state_history">Rainy State History</string>
+    <string name="sunny_state_history">Sunny State History</string>
+    <string name="windy_state_history">Windy State History</string>
+    <string name="db_image">Db image</string>
+    <string name="no_report">No Report</string>
 </resources>

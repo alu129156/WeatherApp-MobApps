@@ -1,9 +1,10 @@
-package com.example.weatherapp_juanarizaonecha
+package com.example.weatherapp_juanarizaonecha.utils
 
-import android.provider.ContactsContract.Data
+import com.example.weatherapp_juanarizaonecha.sharedpreferences.CrudAPI
 import java.net.URL
 import kotlinx.serialization.json.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.properties.Delegates
 
 enum class WeatherCities(val isoCountryCode: String) {
     Zaragoza("ES"),
@@ -34,17 +35,37 @@ data class CityRequest(val name: String, val countryCode: String) {
     }
 }
 
-data class City (val name: String, val latitude: Float, val longitude: Float, val resolvedAdress: String,
-                 val description: String, val timezone: String, var favourite: Boolean,
-                 val forecasts: List<Forecast>) {
+data class User(val name: String, val email: String, val cities: MutableList<City>){
+}
+
+data class City(
+    val name: String, val latitude: Float, val longitude: Float, val resolvedAdress: String?,
+    val description: String?, val timezone: String?, var favourite: Boolean,
+    val forecasts: MutableList<Forecast>) {
+
+    var reported by Delegates.notNull<Boolean>()
+    lateinit var dateTimeLastReport: String
+    //Use this constructor to get the last report of fav cities
+    constructor(name: String, latitude: Float, longitude: Float,
+                favourite: Boolean, forecasts: MutableList<Forecast>) : this(
+        name = name,
+        latitude = latitude,
+        longitude = longitude,
+        resolvedAdress = null,
+        description = null,
+        timezone = null,
+        favourite = favourite,
+        forecasts = forecasts
+    )
     fun isCity(cityName: String): Boolean{
         return cityName == name
     }
 }
 
-data class Forecast(val datetime: String, val datetimeEpoch: Long, private val tempMax: Float,
-                    private val tempMin: Float, private val temp: Float, val preciProb: Float,
-                    val windSpeed: Float) {
+data class Forecast(
+    val datetime: String, val datetimeEpoch: Long?, private val tempMax: Float,
+    private val tempMin: Float, private val temp: Float, val preciProb: Float,
+    val windSpeed: Float) {
 
     val temperature = Temperature(temp)
     val temperatureMax = Temperature(tempMax)
@@ -59,6 +80,14 @@ data class Forecast(val datetime: String, val datetimeEpoch: Long, private val t
     fun getDayAndMonth(): String {
         return getDay().toString() + " of " + getMonthName(getMonth())
     }
+
+    fun getPrecipProb(): String {
+        return "$preciProb%"
+    }
+
+    fun getWindSpeed(): String {
+        return "$windSpeed km/h"
+    }
 }
 
 data class Temperature(private val temperature: Float) {
@@ -71,6 +100,10 @@ data class Temperature(private val temperature: Float) {
     }
 }
 
+/**
+ * SINGLETON to store data fetched from the API. My user is going to have
+ * always the data of the 10 cities lists whith it´s last reports
+ */
 object DataUtils {
     var citiesRequest = mutableListOf<CityRequest>().apply {
         WeatherCities.entries.forEach { city ->
@@ -78,7 +111,10 @@ object DataUtils {
         }
     }
     private var citiesMap = ConcurrentHashMap<CityRequest, City>() //Avoid race conditions in corrutines
-    lateinit var cities: MutableList<City>
+    private lateinit var cities: MutableList<City>
+    var latitude by Delegates.notNull<Double>()
+    var longitude by Delegates.notNull<Double>()
+    lateinit var user: User
 
     fun fillData(cityRequest: CityRequest, apiResponse: String) {
         val jsonObject = parseJson(apiResponse)
@@ -124,26 +160,13 @@ object DataUtils {
     fun setCitiesIntoList() {
         cities = citiesMap.values.toMutableList()
     }
-}
-
-//METHOD TO GET THE CURRENT FAVOURITE CITIES
-fun getFavCities(): MutableList<City> {
-    val favCities = mutableListOf<City>()
-    DataUtils.cities.forEach { city ->
-        if(city.favourite) {
-            favCities.add(city)
+    fun setFavCities(repository: CrudAPI) {
+        cities.forEach { city ->
+            city.favourite = repository.contains(city.name)
         }
+        addUser()
     }
-    return favCities
-}
-
-
-fun findCityInCities(cityName: String): City? {
-    DataUtils.cities.forEach { city ->
-        if(city.isCity(cityName)) {
-            return city
-        }
+    private fun addUser() {
+        user = User("Juan","alu129156@usj.es", cities)
     }
-    return null
 }
-
