@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import com.example.weatherapp_juanarizaonecha.dao.toCity
 import com.example.weatherapp_juanarizaonecha.utils.City
 import com.example.weatherapp_juanarizaonecha.utils.DataUtils
@@ -73,14 +72,14 @@ fun getCity(str: String, needAReportInCity: Boolean): City? {
     val cityStr = params2[0]
     DataUtils.user.cities.forEach { cCity ->
         if(cCity.isCity(cityStr)){
-            if(cCity.favourite && needAReportInCity) { //For the last report filtering in Fav Cities Activity
+            if(cCity.favourite && needAReportInCity) { //This is 4 the last report filtering in Fav Cities Activity
                 val historicalCities = HistoricUtils.getCities(cCity.name) //Maybe you have saved a report detail
 
                 //If has a report add it´s last report, if not add the current today city forecast
                 if(historicalCities.isNotEmpty()) {
                     val cHist = toCity(historicalCities[historicalCities.size - 1], cCity.favourite)
                     cHist.reported = true
-                    cHist.dateTimeLastReport = historicalCities[historicalCities.size - 1].dateTime
+                    cHist.dateTimeLastReport = historicalCities[historicalCities.size - 1].dateTimeStr
                     return cHist
                 }
             }

@@ -28,9 +28,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedReader
+import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
+import java.net.URL
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
@@ -50,41 +53,60 @@ class SplashScreenActivity : AppCompatActivity() {
         dao.setContext(this)
         return dao
     }
+    private var internetConnection: Boolean = true //Supose that I have connection at first
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(view.root)
+
         flpc = LocationServices.getFusedLocationProviderClient(this)
-        startRotatingImageLogo()
+        startRotatingImageLogo() //Rotation animations
 
         val scope = CoroutineScope(Dispatchers.IO)
         val jobs = mutableListOf<Job>()
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) { //REQUEST LOCATION PERMISIONS
+        val jobInternetConnection = scope.launch {
+            val networkAv = isNetworkAvailable()
+            withContext(Dispatchers.Main) {
+                if(!networkAv) {
+                    internetConnection = false //No connection --> Cancel the rest of the execution
+                    navigateToNoConnectionActivity(this@SplashScreenActivity)
+                }
+            }
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) { //REQUEST FOR LOCATION PERMISIONS
             ActivityCompat.requestPermissions(this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
         }
 
-        flpc.lastLocation.addOnSuccessListener { location->
-            DataUtils.latitude = location.latitude
-            DataUtils.longitude = location.longitude
+        scope.launch {
+            jobInternetConnection.join()
 
-            DataUtils.citiesRequest.forEach { cityReq ->
-                val job = scope.launch {
-                    val apiData = fetchDataFromApi(cityReq)
-                    DataUtils.fillData(cityReq, apiData)
-                }
-                jobs.add(job)
-            }
+            if(internetConnection) { //Do this if there is Internet connection
+                flpc.lastLocation.addOnSuccessListener { location-> //After geting location, do the rest
+                    DataUtils.latitude = location.latitude
+                    DataUtils.longitude = location.longitude
 
-            scope.launch {
-                jobs.joinAll()
-                withContext(Dispatchers.Main) {
-                    DataUtils.setCitiesIntoList()
-                    DataUtils.setFavCities(repository)
-                    loadAllReports()
-                    navigateToMainActivity(this@SplashScreenActivity)
+                    DataUtils.citiesRequest.forEach { cityReq ->
+                        val job = scope.launch {
+                            val apiData = fetchDataFromApi(cityReq)
+                            DataUtils.fillData(cityReq, apiData)
+                        }
+                        jobs.add(job)
+                    }
+
+                    scope.launch {
+                        jobs.joinAll() //If there a connection is resolve all the API requests
+                        withContext(Dispatchers.Main) {
+                            DataUtils.setCitiesIntoList()
+                            DataUtils.setFavCities(repository)
+                            loadAllReports()
+                            navigateToMainActivity(this@SplashScreenActivity)
+                        }
+                    }
                 }
             }
         }
@@ -102,7 +124,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun fetchDataFromApi(cityRequest: CityRequest): String {
-        var result = ""
+        val result : String
         val url = cityRequest.getUrl()
         val urlConnection = url.openConnection() as HttpURLConnection
         try {
@@ -127,21 +149,42 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun loadAllReports() {
         DataUtils.user.cities.forEach { city ->
-            val histories = dao.findReportsByCity(city.name)
-            //HistoricUtils.setAllCities(histories)
+            val histories = dao.findReportsByCity(city.name) //CityHistory cities in order ascend
             if(histories.isNotEmpty()){
+                HistoricUtils.setCities(histories)
                 city.reported = true
-                city.dateTimeLastReport = histories[histories.size -1].dateTime //Last report time
+                city.dateTimeLastReport = histories[histories.size -1].dateTimeStr //Last report time
             } else {
                 city.reported = false
             }
         }
-        HistoricUtils.setAllCities(dao.findAll())
     }
 
     private fun navigateToMainActivity(context: Context) {
         val intent = Intent(context,MainScreenActivity::class.java)
         startActivity(intent)
         finish() //Out of the Stack
+    }
+
+    private fun navigateToNoConnectionActivity(context:Context) {
+        val intent = Intent(context,NoWifiConnectionActivity::class.java)
+        startActivity(intent)
+        finish() //Out of the Stack
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val url = URL("https://www.google.com") //Verify if a can do a simple HTTP request
+        val urlConnection = url.openConnection() as HttpURLConnection
+        urlConnection.connectTimeout = 2000 //2 sec of timeout
+        return try {
+            urlConnection.connect()
+            urlConnection.responseCode == 200 //RESPONSE: 200 Ok
+        } catch (e: IOException) {
+            false
+        } catch (s: SocketTimeoutException) {
+            false
+        } finally {
+            urlConnection.disconnect()
+        }
     }
 }

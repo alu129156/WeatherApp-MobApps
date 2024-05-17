@@ -10,7 +10,7 @@ import com.example.weatherapp_juanarizaonecha.dao.CityHistory
 object HistoricUtils {
     private var allCities = mutableListOf<CityHistory>()
 
-    fun setAllCities(elements: List<CityHistory>) {
+    fun setCities(elements: List<CityHistory>) {
         elements.forEach { element ->
             allCities.add(element)
         }
@@ -32,5 +32,14 @@ object HistoricUtils {
             }
         }
         return searchedCities
+    }
+
+    fun sameDateTime(cityName: String, dateTime: String): Boolean {
+        allCities.forEach { city ->
+            if(city.name == cityName && city.dateTime == dateTime) {
+                return true
+            }
+        }
+        return false
     }
 }

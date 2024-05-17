@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3F78B5"
+    tools:context=".NoWifiConnectionActivity">
+
+    <ImageView
+        android:id="@+id/imCloudNoConnection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="122dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginBottom="306dp"
+        android:contentDescription="@string/cloud_no_connection"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/no_connection"
+        tools:ignore="ImageContrastCheck" />
+
+    <ImageView
+        android:id="@+id/imMobNoConnection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="138dp"
+        android:layout_marginEnd="138dp"
+        android:layout_marginBottom="48dp"
+        android:contentDescription="@string/mobile_no_connection"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imCloudNoConnection"
+        app:layout_constraintVertical_bias="0.368"
+        app:srcCompat="@mipmap/mob_nocon" />
+</androidx.constraintlayout.widget.ConstraintLayout>

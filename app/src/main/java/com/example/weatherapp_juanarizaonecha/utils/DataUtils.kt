@@ -35,8 +35,7 @@ data class CityRequest(val name: String, val countryCode: String) {
     }
 }
 
-data class User(val name: String, val email: String, val cities: MutableList<City>){
-}
+data class User(val name: String, val email: String, val cities: MutableList<City>)
 
 data class City(
     val name: String, val latitude: Float, val longitude: Float, val resolvedAdress: String?,
@@ -44,7 +43,8 @@ data class City(
     val forecasts: MutableList<Forecast>) {
 
     var reported by Delegates.notNull<Boolean>()
-    lateinit var dateTimeLastReport: String
+    lateinit var dateTimeLastReport: String //Format : ${day} of ${month}
+
     //Use this constructor to get the last report of fav cities
     constructor(name: String, latitude: Float, longitude: Float,
                 favourite: Boolean, forecasts: MutableList<Forecast>) : this(

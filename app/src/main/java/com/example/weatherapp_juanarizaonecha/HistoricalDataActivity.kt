@@ -23,12 +23,14 @@ class HistoricalDataActivity : AppCompatActivity() {
         setContentView(view.root)
         val intent = intent
         val cities = HistoricUtils.getCities(intent.getStringExtra("History_City")!!)
+
         view.twInitHistoric.text = "HISTORY IN ${cities[0].name}"
         val temps = mutableListOf<Float>()
         val tempsMax = mutableListOf<Float>()
         val tempsMin = mutableListOf<Float>()
         val windsSpeed = mutableListOf<Float>()
         val precipProbs = mutableListOf<Float>()
+
         cities.forEach { city ->
             temps.add(city.temper)
             tempsMax.add(city.tempMax)
@@ -103,12 +105,13 @@ class HistoricalDataActivity : AppCompatActivity() {
         var text = "   From "
         cities.forEach { city ->
             if(first) {
-                text += city.dateTime + " to "
+                text += city.dateTimeStr + " to "
                 first = false
             }
             lastCity = city     //Last reportID == lastDateTime
         }
-        text += lastCity.dateTime
+        text += lastCity.dateTimeStr
         view.twHistDate.text = text
     }
 }
+

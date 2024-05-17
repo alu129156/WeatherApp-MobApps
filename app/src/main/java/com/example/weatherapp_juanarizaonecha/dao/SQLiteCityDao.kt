@@ -30,6 +30,7 @@ class SQLiteCityDao: IDao<CityHistory> {
         city.put("windSpeed", element.windSpeed)
         city.put("latitude",element.latitude)
         city.put("longitude",element.longitude)
+        city.put("dateTimeStr",element.dateTimeStr)
         val id = db.insert(TABLE, null, city)
         element.reportID = id //Save reportID in the CityHistory instance
         db.close()
@@ -49,7 +50,7 @@ class SQLiteCityDao: IDao<CityHistory> {
         db = helper!!.readableDatabase
         val cities = mutableListOf<CityHistory>()
         val cursor = db.rawQuery("SELECT reportID, dateTime, name, tempMin, tempMax, temper, precipProb," +
-                " windSpeed, latitude, longitude FROM $TABLE", arrayOf())
+                " windSpeed, latitude, longitude, dateTimeStr FROM $TABLE", arrayOf())
         if (cursor.moveToFirst()) {
             do {
                 val reportID = cursor.getLong(0)
@@ -62,8 +63,9 @@ class SQLiteCityDao: IDao<CityHistory> {
                 val windSpeed = cursor.getFloat(7)
                 val latitude = cursor.getFloat(8)
                 val longitude = cursor.getFloat(9)
+                val dateTimeStr = cursor.getString(10)
                 val city = CityHistory(dateTime, name, tempMin, tempMax, temper, precipProb, windSpeed,
-                    latitude,longitude)
+                    latitude,longitude,dateTimeStr)
                 city.reportID = reportID
                 cities.add(city)
             } while (cursor.moveToNext())
@@ -77,7 +79,7 @@ class SQLiteCityDao: IDao<CityHistory> {
         db = helper!!.readableDatabase
         var city: CityHistory? = null
         val cursor = db.rawQuery("SELECT reportID, dateTime, name, tempMin, tempMax, temper, precipProb, windSpeed,"
-                + "latitude, longitude FROM $TABLE WHERE reportID = ?", arrayOf(id.toString()))
+                + "latitude, longitude, dateTimeStr FROM $TABLE WHERE reportID = ?", arrayOf(id.toString()))
         if (cursor.moveToFirst()) {
             do {
                 val dateTime = cursor.getString(1)
@@ -89,7 +91,9 @@ class SQLiteCityDao: IDao<CityHistory> {
                 val windSpeed = cursor.getFloat(7)
                 val latitude = cursor.getFloat(8)
                 val longitude = cursor.getFloat(9)
-                city = CityHistory(dateTime, name, tempMin, tempMax, temper, precipProb, windSpeed,latitude, longitude)
+                val dateTimeStr = cursor.getString(10)
+                city = CityHistory(dateTime, name, tempMin, tempMax, temper, precipProb, windSpeed,latitude,
+                    longitude, dateTimeStr)
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -105,7 +109,8 @@ class SQLiteCityDao: IDao<CityHistory> {
         db = helper!!.readableDatabase
         val cities = mutableListOf<CityHistory>()
         val cursor = db.rawQuery("SELECT reportID, dateTime, name, tempMin, tempMax, temper, precipProb," +
-                " windSpeed, latitude, longitude FROM $TABLE WHERE name = ? ORDER BY reportID ASC", arrayOf(cityName))
+                " windSpeed, latitude, longitude, dateTimeStr" +
+                " FROM $TABLE WHERE name = ? ORDER BY dateTime ASC", arrayOf(cityName))
         if (cursor.moveToFirst()) {
             do {
                 val reportID = cursor.getLong(0)
@@ -118,8 +123,9 @@ class SQLiteCityDao: IDao<CityHistory> {
                 val windSpeed = cursor.getFloat(7)
                 val latitude = cursor.getFloat(8)
                 val longitude = cursor.getFloat(9)
+                val dateTimeStr = cursor.getString(10)
                 val city = CityHistory(dateTime, name, tempMin, tempMax, temper, precipProb, windSpeed,
-                    latitude, longitude)
+                    latitude, longitude, dateTimeStr)
                 city.reportID = reportID
                 cities.add(city)
             } while (cursor.moveToNext())

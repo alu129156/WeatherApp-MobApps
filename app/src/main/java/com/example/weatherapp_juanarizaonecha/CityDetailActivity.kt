@@ -50,6 +50,8 @@ class CityDetailActivity : AppCompatActivity() {
         Shared.setWeatherData(city,this)
         view.cbFavourite.isChecked = city.favourite
 
+       oneReportPerDay(city)
+
         view.cbFavourite.setOnCheckedChangeListener { _, isChecked ->
             city.favourite = isChecked
             if(city.favourite){
@@ -96,6 +98,13 @@ class CityDetailActivity : AppCompatActivity() {
                         city.dateTimeLastReport = searched.forecasts[0].getDayAndMonth()
                     }
                 }
+        }
+    }
+
+    private fun oneReportPerDay(city: City) {
+        //No reports saved today --> Only able to save one report per day
+        if(HistoricUtils.sameDateTime(city.name,city.forecasts[0].datetime)) {
+            view.cbSaveReport.isEnabled = false
         }
     }
 

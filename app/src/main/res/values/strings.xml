@@ -37,4 +37,6 @@
     <string name="windy_state_history">Windy State History</string>
     <string name="db_image">Db image</string>
     <string name="no_report">No Report</string>
+    <string name="cloud_no_connection">Cloud no connection</string>
+    <string name="mobile_no_connection">Mobile no connection</string>
 </resources>

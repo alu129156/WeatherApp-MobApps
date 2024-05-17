@@ -1,10 +1,8 @@
 package com.example.weatherapp_juanarizaonecha.shared
 
-import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp_juanarizaonecha.R
-import com.example.weatherapp_juanarizaonecha.dao.CityHistory
 import com.example.weatherapp_juanarizaonecha.dao.toCity
 import com.example.weatherapp_juanarizaonecha.utils.City
 import com.example.weatherapp_juanarizaonecha.utils.DataUtils
@@ -61,9 +59,10 @@ object Shared {
 
                 //If has a report add it´s last report, if not add the current today city forecast
                 if(historicalCities.isNotEmpty()) {
+                    //The last historical city has the most actual report saved in DB
                     val cHist = toCity(historicalCities[historicalCities.size-1],city.favourite)
                     cHist.reported = true
-                    cHist.dateTimeLastReport = historicalCities[historicalCities.size-1].dateTime
+                    cHist.dateTimeLastReport = historicalCities[historicalCities.size-1].dateTimeStr
                     favCities.add(cHist)
                 } else {
                     favCities.add(city)

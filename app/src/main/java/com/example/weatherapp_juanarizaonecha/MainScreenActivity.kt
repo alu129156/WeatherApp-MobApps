@@ -5,12 +5,10 @@ import android.os.Bundle
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
-import com.example.weatherapp_juanarizaonecha.dao.SQLiteCityDao
 import com.example.weatherapp_juanarizaonecha.databinding.ActivityMainScreenBinding
 import com.example.weatherapp_juanarizaonecha.shared.Shared
 import com.example.weatherapp_juanarizaonecha.utils.City
 import com.example.weatherapp_juanarizaonecha.utils.DataUtils
-import com.example.weatherapp_juanarizaonecha.utils.HistoricUtils
 import com.example.weatherapp_juanarizaonecha.utils.WeatherCities
 
 class MainScreenActivity : AppCompatActivity() {
@@ -39,10 +37,10 @@ class MainScreenActivity : AppCompatActivity() {
     private fun findCityDefault(): City? {
         DataUtils.user.cities.forEach { city ->
             if (city.isCity(WeatherCities.Zaragoza.name)) {
-                return city;
+                return city
             }
         }
-        return null;
+        return null
     }
 
     private fun setLocation(city: City, latitude: Double, longitude: Double) {
