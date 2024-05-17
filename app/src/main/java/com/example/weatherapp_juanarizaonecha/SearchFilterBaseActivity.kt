@@ -90,6 +90,7 @@ abstract class SearchFilterBaseActivity : AppCompatActivity() {
         super.onResume()
         sfCities = SearchFilterController(cities)
         adapter.clear()
+        adapter.clearListeners()
         adapter.addAll(sfCities.filterByCoordinates())
         adapter.notifyDataSetChanged()
     }
@@ -108,10 +109,10 @@ abstract class SearchFilterBaseActivity : AppCompatActivity() {
                 val city = getCity(item.toString(),true)!!
                 updatedCities.add(city)
             }
-            val remCities = cities.size - items.size //Cities listeners to be removed
+
             cities = updatedCities
             sfCities = SearchFilterController(cities)
-            adapter.removeListeners(remCities) //Remove the listeners from removed cities
+            adapter.clearListeners() //Remove the listeners from removed cities
         }
     }
 }

@@ -103,11 +103,12 @@ class CustomCitiesAdapter(context: Context, private var cities: MutableList<City
         return listeners.isNotEmpty()
     }
 
-    fun removeListeners(num: Int) {
-        for (i in 0 until num) {
-            listeners.pop()
+    fun clearListeners() {
+        if(listeners.isNotEmpty()) {
+            listeners.clear()
         }
     }
+
     private fun storeDataInRepository() {
         repository.clear()
         cities.forEach { city->
